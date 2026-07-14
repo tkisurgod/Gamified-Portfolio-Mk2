@@ -98,7 +98,11 @@ In your repository settings, set **Pages → Source** to the `gh-pages` branch.
 
 ## Roadmap
 
-- [ ] Flesh out `Home.jsx` with real CV content (experience, projects, security write-ups)
+- [x] Compromised-desktop homepage (`src/components/Desktop/`) — draggable icons, real windowed CV viewer, taskbar
+- [ ] Replace Recycle Bin / My Pictures placeholder content with real honourable-mention projects and photos
+- [ ] Project icons on the desktop (e.g. the movie site as a vintage camera wrapped in film), each opening its own window
+- [ ] Heavier transition between the minigame's "ACCESS GRANTED" and the desktop appearing
+- [ ] Touch/mobile pass on desktop icon and window dragging (currently verified on desktop pointer input only)
 - [ ] Add a skip/replay toggle for the minigame on repeat visits
 - [ ] Accessibility pass on the minigame (keyboard-only is supported; screen-reader fallback is not yet)
 
