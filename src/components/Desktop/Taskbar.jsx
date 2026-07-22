@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import StartMenu from "./StartMenu";
 
 function useClock() {
   const [now, setNow] = useState(() => new Date());
@@ -9,9 +10,10 @@ function useClock() {
   return now;
 }
 
-export default function Taskbar({ windows, onFocus }) {
+export default function Taskbar({ windows, onFocus, onOpen }) {
   const now = useClock();
   const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const [startOpen, setStartOpen] = useState(false);
 
   return (
     <div style={{
@@ -21,15 +23,25 @@ export default function Taskbar({ windows, onFocus }) {
       borderTop: "1px solid #4d7fe8",
       fontFamily: '"Segoe UI", Tahoma, Verdana, sans-serif',
     }}>
-      <div style={{
-        display: "flex", alignItems: "center", gap: 6, height: "100%", padding: "0 14px 0 10px",
-        background: "linear-gradient(180deg, #3fae3f 0%, #2d8f2d 50%, #1f7a1f 100%)",
-        color: "#fff", fontWeight: "bold", fontStyle: "italic", fontSize: 15,
-        clipPath: "polygon(0 0, 100% 0, 92% 100%, 0% 100%)",
-        marginRight: 16, textShadow: "1px 1px 1px rgba(0,0,0,0.4)",
-      }}>
+      {startOpen && (
+        <StartMenu onOpen={onOpen} onClose={() => setStartOpen(false)} />
+      )}
+
+      <button
+        onPointerDown={(e) => { e.stopPropagation(); setStartOpen((v) => !v); }}
+        style={{
+          display: "flex", alignItems: "center", gap: 6, height: "100%", padding: "0 20px 0 12px",
+          background: startOpen
+            ? "linear-gradient(180deg, #2d8f2d 0%, #1f7a1f 50%, #145214 100%)"
+            : "linear-gradient(180deg, #3fae3f 0%, #2d8f2d 50%, #1f7a1f 100%)",
+          color: "#fff", fontWeight: "bold", fontStyle: "italic", fontSize: 15, border: "none",
+          clipPath: "polygon(0 0, 100% 0, 92% 100%, 0% 100%)",
+          marginRight: 16, textShadow: "1px 1px 1px rgba(0,0,0,0.4)", cursor: "pointer",
+          fontFamily: "inherit",
+        }}
+      >
         start
-      </div>
+      </button>
 
       <div style={{ flex: 1, display: "flex", gap: 4, overflow: "hidden" }}>
         {windows.map((w) => (

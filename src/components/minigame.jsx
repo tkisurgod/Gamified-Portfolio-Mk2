@@ -31,6 +31,26 @@ function mkStrip(t) {
   a[TGT_IDX] = t;
   return a;
 }
+
+function BotIcon({ size = 40 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden>
+      {/* antenna */}
+      <circle cx="24" cy="5" r="3" fill="#001a00" />
+      <rect x="23" y="7" width="2" height="5" fill="#001a00" />
+      {/* head */}
+      <rect x="8" y="12" width="32" height="26" rx="6" fill="#001a00" />
+      {/* eyes */}
+      <circle cx="18" cy="23" r="4" fill="#00ff55" />
+      <circle cx="30" cy="23" r="4" fill="#00ff55" />
+      {/* mouth */}
+      <rect x="16" y="31" width="16" height="3" rx="1.5" fill="#00ff55" />
+      {/* ears */}
+      <rect x="3" y="20" width="4" height="10" rx="2" fill="#001a00" />
+      <rect x="41" y="20" width="4" height="10" rx="2" fill="#001a00" />
+    </svg>
+  );
+}
  
 function useFont() {
   useEffect(() => {
@@ -158,6 +178,24 @@ export default function BruteforceGame({ onComplete }) {
     }
   }, []);
  
+  const autoHack = useCallback(() => {
+    if (phaseR.current !== "play") return;
+    const exactY = (((TGT_IDX - CENTER_ROW) * LH) + POOL * LH) % (POOL * LH);
+    for (let i = 0; i < N; i++) {
+      if (lockedR.current.has(i)) continue;
+      lockedR.current.add(i);
+      yOff.current[i] = exactY;
+      if (strips.current[i]) {
+        strips.current[i].style.transition = "transform 0.35s cubic-bezier(0.2,0.9,0.3,1)";
+        strips.current[i].style.transform = `translateY(-${exactY}px)`;
+      }
+    }
+    setRipple(Array.from({ length: N }, (_, i) => i));
+    setLocked(Array.from({ length: N }, (_, i) => i));
+    phaseR.current = "done";
+    setTimeout(() => setPhase("done"), 900);
+  }, []);
+
   useEffect(() => {
     const h = e => {
       if (e.code === "Space" || e.code === "Enter") {
@@ -193,23 +231,49 @@ export default function BruteforceGame({ onComplete }) {
         @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}60%{transform:translateX(8px)}}
         @keyframes rippleG{0%{background:rgba(0,255,68,0.22)}100%{background:transparent}}
         @keyframes missFlash{0%,100%{opacity:1}50%{opacity:0.3}}
+        @keyframes botPulse{0%,100%{transform:translateX(-50%) scale(1);box-shadow:0 0 40px rgba(0,255,68,0.55),0 0 80px rgba(0,255,68,0.25)}50%{transform:translateX(-50%) scale(1.05);box-shadow:0 0 60px rgba(0,255,68,0.85),0 0 120px rgba(0,255,68,0.4)}}
         .ripple{animation:rippleG 0.4s ease-out}
         .miss-col{animation:shake 0.32s ease}
         .win-pulse{animation:rippleG 0.4s ease-out}
+        .autohack-btn:hover{filter:brightness(1.15)}
+        .autohack-btn:active{transform:translateX(-50%) scale(0.97)}
       `}</style>
  
       {/* Instructions */}
       <div style={{
-        position: "fixed", top: 20, left: 20,
-        background: "rgba(0,5,25,0.9)", border: "1px solid #1a3d88",
-        color: "#8899bb", padding: "12px 16px", fontSize: 15, maxWidth: 215,
-        lineHeight: 1.65, pointerEvents: "none",
+        position: "fixed", top: 24, left: 24,
+        background: "rgba(0,5,25,0.92)", border: "2px solid #2a5dcc",
+        color: "#ffffff", padding: "20px 24px", fontSize: 20, maxWidth: 340,
+        lineHeight: 1.6, pointerEvents: "none",
+        boxShadow: "0 0 30px rgba(30,80,220,0.35)",
       }}>
-        <div style={{ color: "#c5d5ff", marginBottom: 6, letterSpacing: 2 }}>INSTRUCTIONS</div>
-        Watch for red letters entering the blue strip across any column.
-        <div style={{ marginTop: 8, color: "#dd3322" }}>All targets scroll in RED</div>
-        <div style={{ color: "#5577cc", marginTop: 2 }}>Press SPACE to lock all matches</div>
+        <div style={{ color: "#ffffff", marginBottom: 12, letterSpacing: 3, fontSize: 22 }}>
+          INSTRUCTIONS
+        </div>
+        To access my portfolio: align the letters in{" "}
+        <span style={{ color: "#ff3b3b", fontWeight: "bold" }}>RED</span> to bruteforce inside{" "}
+        <span style={{ color: "#8fb4ff" }}>OR</span> click the{" "}
+        <span style={{ color: "#00ff55", fontWeight: "bold" }}>AUTO HACK BOT</span>.
       </div>
+
+      {/* Auto Hack Bot button */}
+      <button
+        className="autohack-btn"
+        onClick={e => { e.stopPropagation(); autoHack(); }}
+        style={{
+          position: "fixed", bottom: 34, left: "50%", transform: "translateX(-50%)",
+          display: "flex", alignItems: "center", gap: 16,
+          background: "linear-gradient(135deg, #00e63d, #00992a)",
+          border: "3px solid #00ff55", borderRadius: 12,
+          color: "#001a00", padding: "16px 34px",
+          fontFamily: "VT323, monospace", fontSize: 34, letterSpacing: 3,
+          cursor: "pointer", zIndex: 50,
+          animation: "botPulse 1.5s ease-in-out infinite",
+        }}
+      >
+        <BotIcon size={44} />
+        AUTO HACK BOT
+      </button>
  
       {/* Main window */}
       <div style={{
